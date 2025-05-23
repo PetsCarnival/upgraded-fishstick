@@ -4,32 +4,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pets Carnival - Barkod Sorgulama</title>
+  <title>Pets Carnival - Barkod Okuma</title>
   <style>
     body {
-      background-color: #f8f8f8;
       font-family: Arial, sans-serif;
       text-align: center;
-      padding: 50px 20px;
+      padding: 20px;
+      background-color: #f8f8f8;
     }
-    img.logo {
-      width: 200px;
-      margin-bottom: 20px;
+    img {
+      width: 180px;
+      margin-bottom: 10px;
     }
     h1 {
-      font-size: 24px;
-      margin-bottom: 5px;
+      font-size: 22px;
+      margin: 10px 0;
     }
     .url {
       color: #ff7f00;
+      font-weight: bold;
       margin-bottom: 20px;
       display: block;
     }
     button, input {
-      font-size: 18px;
-      padding: 10px 20px;
-      margin: 10px 0;
-      border-radius: 8px;
+      font-size: 16px;
+      padding: 12px 20px;
+      margin: 10px;
+      border-radius: 6px;
       border: 1px solid #ccc;
     }
     button {
@@ -39,26 +40,22 @@
       cursor: pointer;
     }
     button:hover {
-      background-color: #003580;
+      background-color: #003380;
     }
     #reader {
-      margin-top: 20px;
-      width: 100%;
-      max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
+      margin: 20px auto;
+      width: 300px;
     }
     .result {
+      font-size: 18px;
       margin-top: 20px;
-      font-size: 20px;
-      font-weight: bold;
-      color: green;
+      color: #333;
     }
   </style>
 </head>
 <body>
-  <img src="petscarnival_logo_final_web2.png" alt="Pets Carnival" class="logo">
-  <h1>Ürün Barkodunu Okutarak Fiyat Sorgula</h1>
+  <img src="petscarnival_logo_final_web2.png" alt="Pets Carnival Logo">
+  <h1>Ürün Barkodunu Okutun</h1>
   <span class="url">www.petscarnival.com.tr</span>
 
   <button onclick="startCameraScan()">📷 Kamerayla Barkod Oku</button><br>
@@ -72,9 +69,19 @@
   <script>
     const resultDiv = document.getElementById("result");
 
+    const products = {
+      "8690504030019": { name: "Reflex Tavuklu Kedi Maması 1.5kg", price: "149.90 TL" },
+      "8697427612237": { name: "Mio Tavuklu Kedi Maması 15kg", price: "819.90 TL" },
+      "8681299600202": { name: "Rotipet Doğal Kalsiyum Blok", price: "29.90 TL" },
+      "8681299600306": { name: "Pro Line Somonlu Kedi Maması 1.5KG", price: "189.90 TL" }
+    };
+
     function displayProduct(code) {
-      // Burada kodun karşılığı olan fiyat bilgisi eklenebilir
-      resultDiv.innerText = "Okutulan Barkod: " + code;
+      if (products[code]) {
+        resultDiv.innerHTML = `<b>Ürün:</b> ${products[code].name}<br><b>Fiyat:</b> ${products[code].price}`;
+      } else {
+        resultDiv.innerText = "Ürün bulunamadı: " + code;
+      }
     }
 
     function manualSearch() {
@@ -85,21 +92,17 @@
     function startCameraScan() {
       const qr = new Html5Qrcode("reader");
       document.getElementById("reader").style.display = "block";
-      Html5Qrcode.getCameras().then(devices => {
-        if (devices && devices.length) {
-          qr.start(
-            { facingMode: { exact: "environment" } },
-            { fps: 10, qrbox: 250 },
-            decodedText => {
-              qr.stop();
-              displayProduct(decodedText);
-              document.getElementById("reader").style.display = "none";
-            },
-            errorMessage => {}
-          ).catch(err => {
-            resultDiv.innerText = "Kamera başlatılamadı: " + err;
-          });
-        }
+      qr.start(
+        { facingMode: { exact: "environment" } },
+        { fps: 15, qrbox: 250 },
+        decodedText => {
+          qr.stop();
+          displayProduct(decodedText);
+          document.getElementById("reader").style.display = "none";
+        },
+        errorMessage => {}
+      ).catch(err => {
+        resultDiv.innerText = "Kamera başlatılamadı: " + err;
       });
     }
   </script>
