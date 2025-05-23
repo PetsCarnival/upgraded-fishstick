@@ -4,121 +4,102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barkod Fiyat Sorgulama</title>
+  <title>Pets Carnival - Barkod Sorgulama</title>
   <style>
     body {
       background-color: #f8f8f8;
       font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
       text-align: center;
+      padding: 50px 20px;
     }
-    img {
-      margin-top: 20px;
-      max-width: 220px;
+    img.logo {
+      width: 200px;
+      margin-bottom: 20px;
     }
     h1 {
       font-size: 24px;
-      margin-top: 10px;
-      color: #111;
+      margin-bottom: 5px;
     }
-    .link {
-      color: orange;
-      font-weight: bold;
+    .url {
+      color: #ff7f00;
       margin-bottom: 20px;
+      display: block;
     }
-    input[type="text"] {
-      padding: 14px;
-      font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      width: 80%;
-      max-width: 400px;
+    button, input {
+      font-size: 18px;
+      padding: 10px 20px;
       margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
     button {
-      background-color: #0052cc;
+      background-color: #0047ab;
       color: white;
-      font-size: 16px;
-      padding: 12px 20px;
       border: none;
-      border-radius: 8px;
       cursor: pointer;
-      margin: 8px;
     }
-    #result {
+    button:hover {
+      background-color: #003580;
+    }
+    #reader {
       margin-top: 20px;
-      font-size: 18px;
-      color: #333;
+      width: 100%;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      color: green;
     }
   </style>
 </head>
 <body>
-  <img src="petscarnival_logo_final_web2.png" alt="Pets Carnival Logo">
+  <img src="petscarnival_logo_final_web2.png" alt="Pets Carnival" class="logo">
   <h1>Ürün Barkodunu Okutarak Fiyat Sorgula</h1>
-  <div class="link">www.petscarnival.com.tr</div>
+  <span class="url">www.petscarnival.com.tr</span>
 
-  <button onclick="startCameraScan()">📷 Kamerayla Barkod Oku</button>
-  <br>
-  <input type="text" id="manualInput" placeholder="Barkodu elle yazın" onkeypress="handleKey(event)">
-  <br>
-  <button onclick="displayManual()">🔍 ARA</button>
+  <button onclick="startCameraScan()">📷 Kamerayla Barkod Oku</button><br>
+  <input type="text" id="manualInput" placeholder="Barkodu elle yazın">
+  <button onclick="manualSearch()">🔍 ARA</button>
 
-  <div id="result"></div>
+  <div id="reader" style="display:none;"></div>
+  <div id="result" class="result"></div>
 
-  <div id="reader" style="width: 300px; margin-top: 20px;"></div>
-
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script>
-    const products = {
-      "8690504030019": { name: "Reflex Tavuklu Kedi Maması 1.5kg", price: "149.90 TL" },
-      "8697427612237": { name: "Mio Tavuklu Yetişkin Kedi Maması 15kg", price: "819.90 TL" },
-      "8681299600202": { name: "Rotipet Doğal Kalsiyum Blok", price: "29.90 TL" },
-    };
+    const resultDiv = document.getElementById("result");
 
     function displayProduct(code) {
-      const result = document.getElementById("result");
-      if (products[code]) {
-        result.innerHTML = `<b>Ürün:</b> ${products[code].name}<br><b>Fiyat:</b> ${products[code].price}`;
-      } else {
-        result.innerHTML = "Ürün bulunamadı: " + code;
-      }
+      // Burada kodun karşılığı olan fiyat bilgisi eklenebilir
+      resultDiv.innerText = "Okutulan Barkod: " + code;
     }
 
-    function handleKey(e) {
-      if (e.key === "Enter") {
-        const val = document.getElementById("manualInput").value.trim();
-        displayProduct(val);
-      }
-    }
-
-    function displayManual() {
+    function manualSearch() {
       const val = document.getElementById("manualInput").value.trim();
-      displayProduct(val);
+      if (val) displayProduct(val);
     }
 
     function startCameraScan() {
       const qr = new Html5Qrcode("reader");
+      document.getElementById("reader").style.display = "block";
       Html5Qrcode.getCameras().then(devices => {
         if (devices && devices.length) {
           qr.start(
-            devices[0].id,
-            {
-              fps: 10,
-              qrbox: 250
-            },
+            { facingMode: { exact: "environment" } },
+            { fps: 10, qrbox: 250 },
             decodedText => {
               qr.stop();
               displayProduct(decodedText);
-            }
-          );
+              document.getElementById("reader").style.display = "none";
+            },
+            errorMessage => {}
+          ).catch(err => {
+            resultDiv.innerText = "Kamera başlatılamadı: " + err;
+          });
         }
-      }).catch(err => {
-        document.getElementById("result").innerText = "Kamera başlatılamadı: " + err;
       });
     }
   </script>
