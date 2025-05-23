@@ -30,15 +30,22 @@
       font-size: 18px;
       color: #333;
     }
+    .manual-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
     input {
       padding: 10px;
       font-size: 16px;
-      margin: 10px;
-      width: 80%;
-      max-width: 300px;
+      width: 240px;
+      max-width: 80%;
     }
     button {
-      padding: 10px 20px;
+      padding: 10px 16px;
       font-size: 16px;
       background-color: #0047ab;
       color: white;
@@ -59,10 +66,12 @@
   <img src="petscarnival_logo_final_web2.png" alt="Pets Carnival Logo" />
   <h1>📦 Barkod Okutun veya Yazın</h1>
   <div id="loading">🔄 Ürün verileri yükleniyor...</div>
-  <div>
+
+  <div class="manual-row">
     <input type="text" id="manualInput" placeholder="Barkod elle yazın" />
     <button onclick="manualSearch()">ARA</button>
   </div>
+
   <button onclick="startScan()">📷 Kamerayla Barkod Oku</button>
   <div id="reader"></div>
   <div id="result"></div>
@@ -77,6 +86,7 @@
       .then(data => {
         products = data;
         document.getElementById("loading").style.display = "none";
+        console.log("✅ Ürün verisi yüklendi.");
       })
       .catch(err => {
         document.getElementById("loading").innerText = "🚫 Ürün verileri yüklenemedi.";
@@ -90,11 +100,17 @@
         { facingMode: { exact: "environment" } },
         { fps: 25 },
         decodedText => {
-          scanner.stop();
+          console.log("🎯 Barkod okundu:", decodedText);
           displayProduct(decodedText.trim());
+          setTimeout(() => scanner.stop(), 1000);
         },
         error => {}
-      );
+      ).then(() => {
+        console.log("📷 Kamera başlatıldı.");
+      }).catch(err => {
+        console.error("🚫 Kamera başlatılamadı:", err);
+        document.getElementById("result").innerText = "🚫 Kamera başlatılamadı.";
+      });
     }
 
     function manualSearch() {
