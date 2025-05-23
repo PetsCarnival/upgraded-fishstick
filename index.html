@@ -98,7 +98,7 @@
       scanner = new Html5Qrcode("reader");
       scanner.start(
         { facingMode: { exact: "environment" } },
-        { fps: 25 },
+        { fps: 25, qrbox: { width: 250, height: 100 } },
         decodedText => {
           console.log("🎯 Barkod okundu:", decodedText);
           displayProduct(decodedText.trim());
