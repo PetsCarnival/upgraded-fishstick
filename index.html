@@ -107,6 +107,10 @@
         { facingMode: { exact: "environment" } },
         { fps: 30 },
         decodedText => {
+          console.log("Okunan Barkod:", decodedText);
+          document.getElementById("loading").style.display = "block";
+          const trimmedCode = decodedText.trim();
+          displayProduct(trimmedCode);
           qr.stop();
           displayProduct(decodedText);
           document.getElementById("reader").style.display = "none";
