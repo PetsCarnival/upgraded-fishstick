@@ -23,11 +23,31 @@
     #reader {
       width: 300px;
       margin: 20px auto;
+      display: none;
     }
     #result {
       margin-top: 20px;
       font-size: 18px;
       color: #333;
+    }
+    input {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+      width: 80%;
+      max-width: 300px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #0047ab;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #003380;
     }
     #loading {
       color: gray;
@@ -37,9 +57,14 @@
 </head>
 <body>
   <img src="petscarnival_logo_final_web2.png" alt="Pets Carnival Logo" />
-  <h1>📦 Barkod Okutun, Ürünü Görün</h1>
-  <div id="reader"></div>
+  <h1>📦 Barkod Okutun veya Yazın</h1>
   <div id="loading">🔄 Ürün verileri yükleniyor...</div>
+  <div>
+    <input type="text" id="manualInput" placeholder="Barkod elle yazın" />
+    <button onclick="manualSearch()">ARA</button>
+  </div>
+  <button onclick="startScan()">📷 Kamerayla Barkod Oku</button>
+  <div id="reader"></div>
   <div id="result"></div>
 
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -51,8 +76,7 @@
       .then(res => res.json())
       .then(data => {
         products = data;
-        document.getElementById("loading").innerText = "📷 Kamera başlatılıyor...";
-        startScan();
+        document.getElementById("loading").style.display = "none";
       })
       .catch(err => {
         document.getElementById("loading").innerText = "🚫 Ürün verileri yüklenemedi.";
@@ -60,22 +84,31 @@
       });
 
     function startScan() {
+      document.getElementById("reader").style.display = "block";
       scanner = new Html5Qrcode("reader");
       scanner.start(
         { facingMode: { exact: "environment" } },
         { fps: 25 },
         decodedText => {
           scanner.stop();
-          const code = decodedText.trim();
-          const resultEl = document.getElementById("result");
-          if (products[code]) {
-            resultEl.innerHTML = `<b>Ürün:</b> ${products[code].name}<br><b>Fiyat:</b> ${products[code].price}`;
-          } else {
-            resultEl.innerText = "Ürün bulunamadı: " + code;
-          }
+          displayProduct(decodedText.trim());
         },
         error => {}
       );
+    }
+
+    function manualSearch() {
+      const code = document.getElementById("manualInput").value.trim();
+      displayProduct(code);
+    }
+
+    function displayProduct(code) {
+      const resultEl = document.getElementById("result");
+      if (products[code]) {
+        resultEl.innerHTML = `<b>Ürün:</b> ${products[code].name}<br><b>Fiyat:</b> ${products[code].price}`;
+      } else {
+        resultEl.innerText = "Ürün bulunamadı: " + code;
+      }
     }
   </script>
 </body>
