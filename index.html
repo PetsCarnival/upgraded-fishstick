@@ -4,61 +4,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pets Carnival | Barkod Test</title>
+  <title>HD Barkod Okuyucu</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background: #f9f9f9; }
     #reader { width: 300px; margin: auto; display: none; }
-    input { padding: 10px; font-size: 16px; width: 250px; margin: 10px; }
-    button { padding: 10px 16px; font-size: 16px; background: #004aad; color: #fff; border: none; border-radius: 6px; }
     #result { margin-top: 20px; font-size: 18px; }
+    button {
+      padding: 10px 16px;
+      font-size: 16px;
+      background: #004aad;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <h1>📦 Barkod Testi</h1>
+  <h1>📦 HD Barkod Okuyucu Testi</h1>
   <button onclick="startScan()">📷 Kamerayla Oku</button>
   <div id="reader"></div>
-  <input type="text" id="manualInput" placeholder="Barkodu elle yazın" />
-  <button onclick="manualSearch()">ARA</button>
   <div id="result"></div>
 
   <script>
-    const products = {
-      "5060180810061": { name: "Animology Derma Dog Köpek Şampuanı 250ml", price: "185₺" }
-    };
-
-    const resultDiv = document.getElementById("result");
-
-    function displayProduct(code) {
-      const clean = code.trim().replace(/\s/g, '');
-      console.log("📦 İşlenen Barkod:", clean);
-      if (products[clean]) {
-        resultDiv.innerHTML = `<b>Ürün:</b> ${products[clean].name}<br><b>Fiyat:</b> ${products[clean].price}`;
-      } else {
-        resultDiv.innerText = "Ürün bulunamadı: " + clean;
-      }
-    }
-
     function startScan() {
       const qr = new Html5Qrcode("reader");
       document.getElementById("reader").style.display = "block";
       qr.start(
-        { facingMode: "environment" },
+        { videoConstraints: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } } },
         { fps: 25, qrbox: { width: 250, height: 100 } },
         decodedText => {
           console.log("🎯 Okunan Barkod:", decodedText);
-          displayProduct(decodedText);
+          document.getElementById("result").innerText = "Okunan Barkod: " + decodedText;
           qr.stop();
         },
         error => {}
       ).catch(err => {
-        resultDiv.innerText = "Kamera başlatılamadı: " + err;
+        document.getElementById("result").innerText = "Kamera başlatılamadı: " + err;
       });
-    }
-
-    function manualSearch() {
-      const code = document.getElementById("manualInput").value;
-      displayProduct(code);
     }
   </script>
 </body>
