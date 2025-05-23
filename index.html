@@ -4,39 +4,79 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kamera Testi</title>
+  <title>Pets Carnival | Barkod Sorgulama</title>
   <style>
-    body { font-family: Arial; text-align: center; padding: 50px; }
-    #reader { width: 300px; margin: 20px auto; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background-color: #f8f8f8;
+    }
+    img {
+      width: 180px;
+      margin-bottom: 10px;
+    }
+    h1 {
+      font-size: 22px;
+      margin: 10px 0;
+    }
+    #reader {
+      width: 300px;
+      margin: 20px auto;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #333;
+    }
+    #loading {
+      color: gray;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
-  <h2>📷 Kamera Test Sayfası</h2>
-  <p>Kameran açılıyor mu kontrol et:</p>
+  <img src="petscarnival_logo_final_web2.png" alt="Pets Carnival Logo" />
+  <h1>📦 Barkod Okutun, Ürünü Görün</h1>
   <div id="reader"></div>
-  <p id="status">Bekleniyor...</p>
+  <div id="loading">🔄 Ürün verileri yükleniyor...</div>
+  <div id="result"></div>
 
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script>
-    document.getElementById("status").innerText = "🔄 Kamera başlatılıyor...";
-    const qr = new Html5Qrcode("reader");
-    Html5Qrcode.getCameras().then(devices => {
-      if (devices && devices.length) {
-        qr.start(
-          { facingMode: { exact: "environment" } },
-          { fps: 10 },
-          decodedText => {
-            document.getElementById("status").innerText = "✅ Barkod okundu: " + decodedText;
-            qr.stop();
-          },
-          errorMessage => {}
-        );
-      } else {
-        document.getElementById("status").innerText = "❌ Kamera bulunamadı";
-      }
-    }).catch(err => {
-      document.getElementById("status").innerText = "🚫 Kamera hatası: " + err;
-    });
+    let products = {};
+    let scanner;
+
+    fetch("products.json")
+      .then(res => res.json())
+      .then(data => {
+        products = data;
+        document.getElementById("loading").innerText = "📷 Kamera başlatılıyor...";
+        startScan();
+      })
+      .catch(err => {
+        document.getElementById("loading").innerText = "🚫 Ürün verileri yüklenemedi.";
+        console.error("JSON yüklenemedi:", err);
+      });
+
+    function startScan() {
+      scanner = new Html5Qrcode("reader");
+      scanner.start(
+        { facingMode: { exact: "environment" } },
+        { fps: 25 },
+        decodedText => {
+          scanner.stop();
+          const code = decodedText.trim();
+          const resultEl = document.getElementById("result");
+          if (products[code]) {
+            resultEl.innerHTML = `<b>Ürün:</b> ${products[code].name}<br><b>Fiyat:</b> ${products[code].price}`;
+          } else {
+            resultEl.innerText = "Ürün bulunamadı: " + code;
+          }
+        },
+        error => {}
+      );
+    }
   </script>
 </body>
 </html>
