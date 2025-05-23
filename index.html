@@ -2,125 +2,41 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pets Carnival - Fiyat Sorgulama</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kamera Testi</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-      background-color: #f8f8f8;
-    }
-    img {
-      width: 180px;
-      margin-bottom: 10px;
-    }
-    h1 {
-      font-size: 22px;
-      margin: 10px 0;
-    }
-    .url {
-      color: #ff7f00;
-      font-weight: bold;
-      margin-bottom: 20px;
-      display: block;
-    }
-    button, input {
-      font-size: 16px;
-      padding: 12px 20px;
-      margin: 10px 0;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background-color: #0047ab;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #003380;
-    }
-    #reader {
-      margin: 20px auto;
-      width: 300px;
-    }
-    .result {
-      font-size: 18px;
-      margin-top: 20px;
-      color: #333;
-    }
+    body { font-family: Arial; text-align: center; padding: 50px; }
+    #reader { width: 300px; margin: 20px auto; }
   </style>
 </head>
 <body>
-  <img src="petscarnival_logo_final_web2.png" alt="Pets Carnival Logo">
-  <h1>Ürün Barkodunu Okutun</h1>
-  <span class="url">www.petscarnival.com.tr</span>
-
-  <button onclick="startCameraScan()">📷 Kamerayla Barkod Oku</button><br>
-  <input type="text" id="manualInput" placeholder="Barkodu elle yazın">
-  <button onclick="manualSearch()">🔍 ARA</button>
-
-  <div id="reader" style="display:none;"></div>
-  <div id="result" class="result"></div>
+  <h2>📷 Kamera Test Sayfası</h2>
+  <p>Kameran açılıyor mu kontrol et:</p>
+  <div id="reader"></div>
+  <p id="status">Bekleniyor...</p>
 
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script>
-    let products = {};
-    const resultDiv = document.getElementById("result");
-
-    fetch("products.json")
-      .then(res => res.json())
-      .then(data => {
-        products = data;
-        window.productsReady = true;
-      }).catch(() => {
-        document.getElementById("result").innerText = "Ürün verileri yüklenemedi.";
-      });
-      .then(res => res.json())
-      .then(data => {
-        products = data;
-      });
-
-    function displayProduct(code) {
-      if (products[code]) {
-        resultDiv.innerHTML = `<b>Ürün:</b> ${products[code].name}<br><b>Fiyat:</b> ${products[code].price}`;
+    document.getElementById("status").innerText = "🔄 Kamera başlatılıyor...";
+    const qr = new Html5Qrcode("reader");
+    Html5Qrcode.getCameras().then(devices => {
+      if (devices && devices.length) {
+        qr.start(
+          { facingMode: { exact: "environment" } },
+          { fps: 10 },
+          decodedText => {
+            document.getElementById("status").innerText = "✅ Barkod okundu: " + decodedText;
+            qr.stop();
+          },
+          errorMessage => {}
+        );
       } else {
-        resultDiv.innerText = "Ürün bulunamadı: " + code;
+        document.getElementById("status").innerText = "❌ Kamera bulunamadı";
       }
-    }
-
-    function manualSearch() {
-      const val = document.getElementById("manualInput").value.trim();
-      if (val) displayProduct(val);
-    }
-
-    function startCameraScan() {
-      console.log("📸 Kamera başlatılıyor...");
-      document.getElementById("result").innerText = "📸 Kamera başlatılıyor...";
-      if (!window.productsReady) {
-        alert("Ürün verileri henüz yüklenmedi. Lütfen birkaç saniye sonra tekrar deneyin.");
-        return;
-      }
-      const qr = new Html5Qrcode("reader");
-      document.getElementById("reader").style.display = "block";
-console.log("✅ Kamera bölgesi aktif");
-      qr.start(
-        { facingMode: { exact: "environment" } },
-        { fps: 30 },
-        decodedText => {
-          console.log("🎯 Barkod Okundu:", decodedText);
-          document.getElementById("result").innerText = "🎯 Barkod okundu, eşleşme aranıyor...";
-          qr.stop();
-          displayProduct(decodedText);
-          document.getElementById("reader").style.display = "none";
-        },
-        errorMessage => {}
-      ).catch(err => {
-        resultDiv.innerText = "Kamera başlatılamadı: " + err;
-      });
-    }
+    }).catch(err => {
+      document.getElementById("status").innerText = "🚫 Kamera hatası: " + err;
+    });
   </script>
 </body>
 </html>
