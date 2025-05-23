@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pets Carnival - Barkod Okuma</title>
+  <title>Pets Carnival - Fiyat Sorgulama</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -29,7 +29,7 @@
     button, input {
       font-size: 16px;
       padding: 12px 20px;
-      margin: 10px;
+      margin: 10px 0;
       border-radius: 6px;
       border: 1px solid #ccc;
     }
@@ -67,14 +67,14 @@
 
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script>
+    let products = {};
     const resultDiv = document.getElementById("result");
 
-    const products = {
-      "8690504030019": { name: "Reflex Tavuklu Kedi Maması 1.5kg", price: "149.90 TL" },
-      "8697427612237": { name: "Mio Tavuklu Kedi Maması 15kg", price: "819.90 TL" },
-      "8681299600202": { name: "Rotipet Doğal Kalsiyum Blok", price: "29.90 TL" },
-      "8681299600306": { name: "Pro Line Somonlu Kedi Maması 1.5KG", price: "189.90 TL" }
-    };
+    fetch("products.json")
+      .then(res => res.json())
+      .then(data => {
+        products = data;
+      });
 
     function displayProduct(code) {
       if (products[code]) {
@@ -94,7 +94,7 @@
       document.getElementById("reader").style.display = "block";
       qr.start(
         { facingMode: { exact: "environment" } },
-        { fps: 15, qrbox: 250 },
+        { fps: 25 },
         decodedText => {
           qr.stop();
           displayProduct(decodedText);
