@@ -58,12 +58,11 @@
   <h1>Ürün Barkodunu Okutun</h1>
   <span class="url">www.petscarnival.com.tr</span>
 
-  <button id="startBtn" onclick="startCameraScan()" disabled>📷 Kamerayla Barkod Oku</button><br>
+  <button onclick="startCameraScan()">📷 Kamerayla Barkod Oku</button><br>
   <input type="text" id="manualInput" placeholder="Barkodu elle yazın">
   <button onclick="manualSearch()">🔍 ARA</button>
 
   <div id="reader" style="display:none;"></div>
-  <div id="loading" style="display:none; font-size: 16px; color: gray;">⏳ Yükleniyor...</div>
   <div id="result" class="result"></div>
 
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -71,10 +70,13 @@
     let products = {};
     const resultDiv = document.getElementById("result");
 
-    fetch("products.json").then(res => res.json())
+    fetch("products.json")
+      .then(res => res.json())
       .then(data => {
         products = data;
-        document.getElementById("startBtn").disabled = false;
+        window.productsReady = true;
+      }).catch(() => {
+        document.getElementById("result").innerText = "Ürün verileri yüklenemedi.";
       });
       .then(res => res.json())
       .then(data => {
@@ -82,7 +84,6 @@
       });
 
     function displayProduct(code) {
-      document.getElementById("loading").style.display = "none";
       if (products[code]) {
         resultDiv.innerHTML = `<b>Ürün:</b> ${products[code].name}<br><b>Fiyat:</b> ${products[code].price}`;
       } else {
@@ -96,13 +97,16 @@
     }
 
     function startCameraScan() {
+      if (!window.productsReady) {
+        alert("Ürün verileri henüz yüklenmedi. Lütfen birkaç saniye sonra tekrar deneyin.");
+        return;
+      }
       const qr = new Html5Qrcode("reader");
       document.getElementById("reader").style.display = "block";
       qr.start(
         { facingMode: { exact: "environment" } },
-        { fps: 25 },
+        { fps: 30 },
         decodedText => {
-          document.getElementById("loading").style.display = "block";
           qr.stop();
           displayProduct(decodedText);
           document.getElementById("reader").style.display = "none";
