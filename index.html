@@ -2,130 +2,133 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pets Carnival | Barkod Sorgulama</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-      background-color: #f8f8f8;
-    }
-    img {
-      width: 180px;
-      margin-bottom: 10px;
-    }
-    h1 {
-      font-size: 22px;
-      margin: 10px 0;
-    }
-    #reader {
-      width: 300px;
-      margin: 20px auto;
-      display: none;
-    }
-    #result {
-      margin-top: 20px;
-      font-size: 18px;
-      color: #333;
-    }
-    .manual-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
-    input {
-      padding: 10px;
-      font-size: 16px;
-      width: 240px;
-      max-width: 80%;
-    }
-    button {
-      padding: 10px 16px;
-      font-size: 16px;
-      background-color: #0047ab;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #003380;
-    }
-    #loading {
-      color: gray;
-      font-size: 16px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Ürün Barkod Sorgu</title>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        body {
+            background-color: #f9f9f9;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 30px;
+        }
+        #logo {
+            width: 180px;
+            margin-bottom: 10px;
+        }
+        h1 {
+            font-size: 24px;
+        }
+        .link {
+            color: orange;
+            margin-bottom: 20px;
+            display: block;
+        }
+        #reader {
+            width: 300px;
+            margin: auto;
+            display: none;
+        }
+        #manualInput {
+            width: 300px;
+            height: 35px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        #scanBtn, #searchBtn {
+            margin-top: 15px;
+            background-color: #004aad;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        #loading {
+            font-size: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <img src="petscarnival_logo_final_web2.png" alt="Pets Carnival Logo" />
-  <h1>📦 Barkod Okutun veya Yazın</h1>
-  <div id="loading">🔄 Ürün verileri yükleniyor...</div>
+    <img id="logo" src="https://i.imgur.com/FNw4ZDu.png" alt="Pets Carnival">
+    <h1>Ürün Barkodunu Okutarak Fiyat Sorgula</h1>
+    <span class="link">www.petscarnival.com.tr</span>
+    <button id="scanBtn">📷 Kamerayla Barkod Oku</button>
+    <div id="reader"></div>
+    <br>
+    <input type="text" id="manualInput" placeholder="Barkodu elle yazın" />
+    <button id="searchBtn">🔍 Ara</button>
+    <div id="loading">🔄 Yükleniyor...</div>
+    <div id="result"></div>
 
-  <div class="manual-row">
-    <input type="text" id="manualInput" placeholder="Barkod elle yazın" />
-    <button onclick="manualSearch()">ARA</button>
-  </div>
+    <script>
+        const products = {
+            "5060180810061": { name: "Animology Derma Dog Köpek Şampuanı 250ml", price: "185₺" },
+            "8680860504404": { name: "Quik Yavru Köpek Süt Tozu 150 Gr", price: "145₺" },
+            "8682325230103": { name: "Doggie Deri Boğma Tas.S", price: "95₺" },
+            "8698931096325": { name: "BioPetActive Köpekler İçin Multivitamin 20 Tablet", price: "160₺" },
+            "8680671471213": { name: "Doggie Deri Sırt Göğüs Tasma No:1", price: "250₺" },
+            "8680671443906": { name: "Doggie Deri Sırt Göğüs Tasma No:2", price: "275₺" },
+            "8680671443913": { name: "Doggie Deri Sırt Göğüs Tasma No:3", price: "285₺" },
+            "8680671443920": { name: "Doggie Deri Sırt Göğüs Tasma No:4", price: "290₺" },
+            "8680671443937": { name: "Doggie Deri Sırt Göğüs Tasma No:5", price: "295₺" }
+        };
 
-  <button onclick="startScan()">📷 Kamerayla Barkod Oku</button>
-  <div id="reader"></div>
-  <div id="result"></div>
+        const resultDiv = document.getElementById("result");
+        const readerDiv = document.getElementById("reader");
+        const loading = document.getElementById("loading");
 
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <script>
-    let products = {};
-    let scanner;
+        function displayProduct(code) {
+            loading.style.display = "none";
+            code = code.trim();
+            const product = products[code];
+            if (product) {
+                resultDiv.innerHTML = `<strong>${product.name}</strong><br>Fiyat: ${product.price}`;
+            } else {
+                resultDiv.textContent = `Ürün bulunamadı: ${code}`;
+            }
+        }
 
-    fetch("products.json")
-      .then(res => res.json())
-      .then(data => {
-        products = data;
-        document.getElementById("loading").style.display = "none";
-        console.log("✅ Ürün verisi yüklendi.");
-      })
-      .catch(err => {
-        document.getElementById("loading").innerText = "🚫 Ürün verileri yüklenemedi.";
-        console.error("JSON yüklenemedi:", err);
-      });
+        document.getElementById("scanBtn").addEventListener("click", () => {
+            readerDiv.style.display = "block";
+            loading.style.display = "block";
+            const qr = new Html5Qrcode("reader");
+            qr.start(
+                { facingMode: "environment" },
+                {
+                    fps: 20,
+                    qrbox: { width: 250, height: 250 }
+                },
+                (decodedText) => {
+                    qr.stop().then(() => {
+                        displayProduct(decodedText);
+                    });
+                },
+                (errorMessage) => {}
+            ).catch((err) => {
+                resultDiv.textContent = "Kamera başlatılamadı: " + err;
+                loading.style.display = "none";
+            });
+        });
 
-    function startScan() {
-      document.getElementById("reader").style.display = "block";
-      scanner = new Html5Qrcode("reader");
-      scanner.start(
-        { facingMode: { exact: "environment" } },
-        { fps: 25, qrbox: { width: 250, height: 100 } },
-        decodedText => {
-          console.log("🎯 Barkod okundu:", decodedText);
-          displayProduct(decodedText.trim());
-          setTimeout(() => scanner.stop(), 1000);
-        },
-        error => {}
-      ).then(() => {
-        console.log("📷 Kamera başlatıldı.");
-      }).catch(err => {
-        console.error("🚫 Kamera başlatılamadı:", err);
-        document.getElementById("result").innerText = "🚫 Kamera başlatılamadı.";
-      });
-    }
+        document.getElementById("searchBtn").addEventListener("click", () => {
+            loading.style.display = "block";
+            const val = document.getElementById("manualInput").value.trim();
+            displayProduct(val);
+        });
 
-    function manualSearch() {
-      const code = document.getElementById("manualInput").value.trim();
-      displayProduct(code);
-    }
-
-    function displayProduct(code) {
-      const resultEl = document.getElementById("result");
-      if (products[code]) {
-        resultEl.innerHTML = `<b>Ürün:</b> ${products[code].name}<br><b>Fiyat:</b> ${products[code].price}`;
-      } else {
-        resultEl.innerText = "Ürün bulunamadı: " + code;
-      }
-    }
-  </script>
+        document.getElementById("manualInput").addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                document.getElementById("searchBtn").click();
+            }
+        });
+    </script>
 </body>
 </html>
