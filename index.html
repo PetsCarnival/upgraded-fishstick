@@ -3,56 +3,21 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Zxing Barkod Okuyucu</title>
-  <script type="module">
-    import { BrowserMultiFormatReader } from 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.0.10/esm/index.min.js';
-
-    const codeReader = new BrowserMultiFormatReader();
-    const resultEl = document.getElementById('result');
-    const videoElement = document.getElementById('video');
-
-    document.getElementById('start').addEventListener('click', () => {
-      resultEl.textContent = "🔄 Kamera başlatılıyor...";
-      codeReader
-        .listVideoInputDevices()
-        .then(videoInputDevices => {
-          return codeReader.decodeFromVideoDevice(
-            videoInputDevices[0]?.deviceId,
-            videoElement,
-            (result, err, control) => {
-              if (result) {
-                console.log("🎯 Barkod:", result.getText());
-                resultEl.innerHTML = "<strong>Okunan Barkod:</strong> " + result.getText();
-                control.stop();
-              }
-            }
-          );
-        })
-        .catch(err => {
-          console.error(err);
-          resultEl.textContent = "🚫 Kamera hatası: " + err;
-        });
-    });
-  </script>
-  <style>
-    body { font-family: Arial; text-align: center; padding: 20px; background: #f8f8f8; }
-    video { width: 300px; border: 1px solid #ccc; margin-top: 10px; }
-    #result { font-size: 18px; margin-top: 20px; }
-    button {
-      padding: 10px 20px;
-      background-color: #004aad;
-      color: white;
-      border: none;
-      font-size: 16px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-  </style>
+  <title>Kamera Test</title>
 </head>
 <body>
-  <h1>📷 Zxing Barkod Okuyucu</h1>
-  <button id="start">Kamerayla Barkod Oku</button><br>
-  <video id="video"></video>
-  <div id="result"></div>
+  <button id="kameraAc">Kamerayı Aç</button>
+  <video id="kamera" autoplay playsinline width="300"></video>
+
+  <script>
+    document.getElementById('kameraAc').addEventListener('click', async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        document.getElementById('kamera').srcObject = stream;
+      } catch (err) {
+        alert("Kamera başlatılamadı: " + err.message);
+      }
+    });
+  </script>
 </body>
 </html>
