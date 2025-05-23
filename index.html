@@ -97,20 +97,21 @@
     }
 
     function startCameraScan() {
+      console.log("📸 Kamera başlatılıyor...");
+      document.getElementById("result").innerText = "📸 Kamera başlatılıyor...";
       if (!window.productsReady) {
         alert("Ürün verileri henüz yüklenmedi. Lütfen birkaç saniye sonra tekrar deneyin.");
         return;
       }
       const qr = new Html5Qrcode("reader");
       document.getElementById("reader").style.display = "block";
+console.log("✅ Kamera bölgesi aktif");
       qr.start(
         { facingMode: { exact: "environment" } },
         { fps: 30 },
         decodedText => {
-          console.log("Okunan Barkod:", decodedText);
-          document.getElementById("loading").style.display = "block";
-          const trimmedCode = decodedText.trim();
-          displayProduct(trimmedCode);
+          console.log("🎯 Barkod Okundu:", decodedText);
+          document.getElementById("result").innerText = "🎯 Barkod okundu, eşleşme aranıyor...";
           qr.stop();
           displayProduct(decodedText);
           document.getElementById("reader").style.display = "none";
